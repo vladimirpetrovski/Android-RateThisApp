@@ -31,6 +31,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
 import android.util.Log;
 
 /**
@@ -209,6 +210,7 @@ public class RateThisApp {
         int rateButtonID = sConfig.mYesButtonId != 0 ? sConfig.mYesButtonId : R.string.rta_dialog_ok;
         builder.setTitle(titleId);
         builder.setMessage(messageId);
+        builder.setCancelable(sConfig.mCancelable);
         builder.setPositiveButton(rateButtonID, new OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -216,7 +218,11 @@ public class RateThisApp {
                     sCallback.onYesClicked();
                 }
                 String appPackage = context.getPackageName();
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackage));
+                String url = "https://play.google.com/store/apps/details?id=" + appPackage;
+                if (!TextUtils.isEmpty(sConfig.mUrl)) {
+                    url = sConfig.mUrl;
+                }
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                 context.startActivity(intent);
                 setOptOut(context, true);
             }
@@ -343,6 +349,7 @@ public class RateThisApp {
      * RateThisApp configuration.
      */
     public static class Config {
+        private String mUrl = null;
         private int mCriteriaInstallDays;
         private int mCriteriaLaunchTimes;
         private int mTitleId = 0;
@@ -350,6 +357,7 @@ public class RateThisApp {
         private int mYesButtonId = 0;
         private int mNoButtonId = 0;
         private int mCancelButton = 0;
+        private boolean mCancelable = true;
 
         /**
          * Constructor with default criteria.
@@ -406,6 +414,19 @@ public class RateThisApp {
          */
         public void setCancelButtonText(@StringRes int stringId) {
             this.mCancelButton = stringId;
+        }
+
+        /**
+         * Set navigation url when user clicks rate button.
+         * Typically, url will be https://play.google.com/store/apps/details?id=PACKAGE_NAME for Google Play.
+         * @param url
+         */
+        public void setUrl(String url) {
+            this.mUrl = url;
+        }
+
+        public void setCancelable(boolean cancelable) {
+            this.mCancelable = cancelable;
         }
     }
 
