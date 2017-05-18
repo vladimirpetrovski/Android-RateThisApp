@@ -2,12 +2,12 @@ apply plugin: "com.android.library"
 apply plugin: 'com.novoda.bintray-release'
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.2"
+    compileSdkVersion 25
+    buildToolsVersion "25.0.3"
 
     defaultConfig {
         minSdkVersion 9
-        targetSdkVersion 24
+        targetSdkVersion 25
         versionCode 1
         versionName "1.0"
     }
@@ -20,16 +20,16 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:24.2.1'
+    compile 'com.android.support:appcompat-v7:25.3.1'
     testCompile 'junit:junit:4.12'
-    testCompile "org.robolectric:robolectric:3.1.2"
+    testCompile "org.robolectric:robolectric:3.3.2"
 }
 
 publish {
     userOrg = 'kobakei'
     groupId = 'io.github.kobakei'
     artifactId = 'ratethisapp'
-    publishVersion = "1.1.1"
+    publishVersion = "1.2.0"
     desc = 'Android library to show "Rate this app" dialog'
     website = 'https://github.com/kobakei/Android-RateThisApp'
 }

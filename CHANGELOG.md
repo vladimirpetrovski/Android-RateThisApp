@@ -1,5 +1,28 @@
 # Change Log
 
+## 1.2.0 (2017/04/27)
+
+- New feature
+  - `RateThisApp.onStart` is deprecated. Please call `RateThisApp.onCreate` instead.
+- Other
+  - Refactoring
+  - SDK update
+
+## 1.1.3 (2017/03/23)
+
+- New feature
+  - Add hu and az translations
+- Other
+  - Update SDK version and support lib
+
+## 1.1.2 (2017/02/08)
+
+- New feature
+  - Add `getLaunchCount()`
+- Other
+  - Update SDK version and support lib
+  - Add unit tests
+
 ## 1.1.1 (2017/01/13)
 
 - New feature
@@ -32,7 +55,7 @@
   - Add eu translation
 - Improvement
   - Use real install time from package manager
-- Fix 
+- Fix
   - Cancel callback is not invoked on pressing back key or touching outside.
   - Stacking of multiple rate dialogs
 

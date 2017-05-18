@@ -1,12 +1,12 @@
 /*
- * Copyright 2013-2015 Keisuke Kobayashi
- * 
+ * Copyright 2013-2017 Keisuke Kobayashi
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- *     
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +17,7 @@ package com.kobakei.ratethisapp;
 
 import java.lang.ref.WeakReference;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -84,10 +85,10 @@ public class RateThisApp {
 
     /**
      * Call this API when the launcher activity is launched.<br>
-     * It is better to call this API in onStart() of the launcher activity.
+     * It is better to call this API in onCreate() of the launcher activity.
      * @param context Context
      */
-    public static void onStart(Context context) {
+    public static void onCreate(Context context) {
         SharedPreferences pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         Editor editor = pref.edit();
         // If it is the first launch, save the date in shared preference.
@@ -100,7 +101,7 @@ public class RateThisApp {
         editor.putInt(KEY_LAUNCH_TIMES, launchTimes);
         log("Launch times; " + launchTimes);
 
-        editor.commit();
+        editor.apply();
 
         mInstallDate = new Date(pref.getLong(KEY_INSTALL_DATE, 0));
         mLaunchTimes = pref.getInt(KEY_LAUNCH_TIMES, 0);
@@ -108,6 +109,16 @@ public class RateThisApp {
         mAskLaterDate = new Date(pref.getLong(KEY_ASK_LATER_DATE, 0));
 
         printStatus(context);
+    }
+
+    /**
+     * This API is deprecated.
+     * You should call onCreate instead of this API in Activity's onCreate().
+     * @param context
+     */
+    @Deprecated
+    public static void onStart(Context context) {
+        onCreate(context);
     }
 
     /**
@@ -152,7 +163,7 @@ public class RateThisApp {
             if (mLaunchTimes >= sConfig.mCriteriaLaunchTimes) {
                 return true;
             }
-            long threshold = sConfig.mCriteriaInstallDays * 24 * 60 * 60 * 1000L;	// msec
+            long threshold = TimeUnit.DAYS.toMillis(sConfig.mCriteriaInstallDays);   // msec
             if (new Date().getTime() - mInstallDate.getTime() >= threshold &&
                 new Date().getTime() - mAskLaterDate.getTime() >= threshold) {
                 return true;
@@ -218,12 +229,15 @@ public class RateThisApp {
                     sCallback.onYesClicked();
                 }
                 String appPackage = context.getPackageName();
-                String url = "https://play.google.com/store/apps/details?id=" + appPackage;
+                String url = "market://details?id=" + appPackage;
                 if (!TextUtils.isEmpty(sConfig.mUrl)) {
                     url = sConfig.mUrl;
                 }
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                context.startActivity(intent);
+                try {
+                    context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                } catch (android.content.ActivityNotFoundException anfe) {
+                    context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/details?id=" + context.getPackageName())));
+                }
                 setOptOut(context, true);
             }
         });
@@ -267,7 +281,7 @@ public class RateThisApp {
 
     /**
      * Clear data in shared preferences.<br>
-     * This API is called when the rate dialog is approved or canceled.
+     * This API is called when the "Later" is pressed or canceled.
      * @param context
      */
     private static void clearSharedPreferences(Context context) {
@@ -275,11 +289,13 @@ public class RateThisApp {
         Editor editor = pref.edit();
         editor.remove(KEY_INSTALL_DATE);
         editor.remove(KEY_LAUNCH_TIMES);
-        editor.commit();
+        editor.apply();
     }
 
     /**
-     * Set opt out flag. If it is true, the rate dialog will never shown unless app data is cleared.
+     * Set opt out flag.
+     * If it is true, the rate dialog will never shown unless app data is cleared.
+     * This method is called when Yes or No is pressed.
      * @param context
      * @param optOut
      */
@@ -287,7 +303,7 @@ public class RateThisApp {
         SharedPreferences pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         Editor editor = pref.edit();
         editor.putBoolean(KEY_OPT_OUT, optOut);
-        editor.commit();
+        editor.apply();
         mOptOut = optOut;
     }
 
@@ -320,7 +336,7 @@ public class RateThisApp {
         SharedPreferences pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         Editor editor = pref.edit();
         editor.putLong(KEY_ASK_LATER_DATE, System.currentTimeMillis());
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -391,7 +407,7 @@ public class RateThisApp {
         public void setMessage(@StringRes int stringId) {
             this.mMessageId = stringId;
         }
-        
+
         /**
          * Set rate now string ID.
          * @param stringId
@@ -399,7 +415,7 @@ public class RateThisApp {
         public void setYesButtonText(@StringRes int stringId) {
             this.mYesButtonId = stringId;
         }
-        
+
         /**
          * Set no thanks string ID.
          * @param stringId
@@ -407,7 +423,7 @@ public class RateThisApp {
         public void setNoButtonText(@StringRes int stringId) {
             this.mNoButtonId = stringId;
         }
-        
+
         /**
          * Set cancel string ID.
          * @param stringId

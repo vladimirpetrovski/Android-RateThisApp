@@ -2,7 +2,7 @@ Android-RateThisApp
 ===================
 
 [![Build Status](https://circleci.com/gh/kobakei/Android-RateThisApp.svg?style=shield)](https://circleci.com/gh/kobakei/Android-RateThisApp/tree/master)
-[ ![Download](https://api.bintray.com/packages/kobakei/maven/ratethisapp/images/download.svg) ](https://bintray.com/kobakei/maven/ratethisapp/_latestVersion)
+[![Download](https://api.bintray.com/packages/kobakei/maven/ratethisapp/images/download.svg) ](https://bintray.com/kobakei/maven/ratethisapp/_latestVersion)
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Android--RateThisApp-green.svg?style=true)](https://android-arsenal.com/details/1/2893)
 
 Android-RateThisApp is an library to show "Rate this app" dialog.
@@ -32,31 +32,36 @@ x.y.z is [ ![Download](https://api.bintray.com/packages/kobakei/maven/ratethisap
 
 ### Basic usage
 
-Call `RateThisApp.onStart(Context)` and `RateThisApp.showRateDialogIfNeeded(Context)` in your launcher activity's onStart() method.
+Call `RateThisApp.onCreate(Context)` and `RateThisApp.showRateDialogIfNeeded(Context)` in your launcher activity's onCreate() method.
 
 ```java
 @Override
-protected void onStart() {
-    super.onStart();
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
 
     // Monitor launch times and interval from installation
-    RateThisApp.onStart(this);
-    // If the criteria is satisfied, "Rate this app" dialog will be shown
+    RateThisApp.onCreate(this);
+    // If the condition is satisfied, "Rate this app" dialog will be shown
     RateThisApp.showRateDialogIfNeeded(this);
 }
 ```
 
-### Custom criteria
+That's all! You can see "Rate this app" dialog at an appropriate timing.
 
-The default criteria to show the dialog is as below:
+## Advanced usages
+
+### Custom condition
+
+In default, the dialog will be shown when **any of** the following conditions is satisfied.
 
 * App is launched more than 10 times
 * App is launched more than 7 days later than installation.
 
-If you want to use your own criteria, please call `RateThisApp.init(Configuration)` in your Application or launcher activity onCreate method.
+If you want to use your own condition, please call `RateThisApp.init(Configuration)` in your Application or launcher activity onCreate method.
 
 ```java
-// Custom criteria: 3 days and 5 launches
+// Custom condition: 3 days and 5 launches
 RateThisApp.Config config = new RateThisApp.Config(3, 5);
 RateThisApp.init(config);
 ```
